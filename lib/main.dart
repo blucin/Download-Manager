@@ -1,7 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:background_downloader/background_downloader.dart';
+import 'package:permission_handler/permission_handler.dart';
+import './pages/home.dart';
+import './pages/history.dart';
+import './pages/pending.dart';
+import './pages/settings.dart';
+import './providers.dart';
 
-void main() {
-  runApp(const NavigationBarApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
+
+  // Check for storage permission
+  if (await Permission.storage.isGranted) {
+    // Permission is already granted
+  } else {
+    // Request permission
+    final status = await Permission.storage.request();
+    if (status.isGranted) {
+      // Permission granted
+    } else {
+      // Permission denied
+    }
+  } 
+
+  FileDownloader().configureNotification(
+    running: TaskNotification('Downloading', 'file: {filename}'),
+    progressBar: true
+  );
+
+  runApp(
+    ProviderScope(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
+      ],
+      child: const NavigationBarApp(),
+    ),
+  );
 }
 
 class NavigationBarApp extends StatelessWidget {
@@ -10,25 +47,40 @@ class NavigationBarApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(useMaterial3: true),
+      theme: ThemeData(
+        useMaterial3: true,
+        colorSchemeSeed: Colors.blue,
+        brightness: Brightness.light,
+      ),
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        colorSchemeSeed: Colors.blue,
+        brightness: Brightness.dark,
+      ),
       home: const NavigationExample(),
     );
   }
 }
 
-class NavigationExample extends StatefulWidget {
+class NavigationExample extends ConsumerStatefulWidget {
   const NavigationExample({super.key});
 
   @override
-  State<NavigationExample> createState() => _NavigationExampleState();
+  ConsumerState<NavigationExample> createState() => _NavigationExampleState();
 }
 
-class _NavigationExampleState extends State<NavigationExample> {
+class _NavigationExampleState extends ConsumerState<NavigationExample> {
   int currentPageIndex = 0;
 
   @override
+  void initState() {
+    super.initState();
+    // Access the provider to ensure it is active
+    ref.read(downloadUpdatesProvider);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
     return Scaffold(
       bottomNavigationBar: NavigationBar(
         onDestinationSelected: (int index) {
@@ -46,6 +98,11 @@ class _NavigationExampleState extends State<NavigationExample> {
           NavigationDestination(
             icon: Icon(Icons.history_outlined),
             selectedIcon: Icon(Icons.history),
+            label: 'Pending',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.schedule_outlined),
+            selectedIcon: Icon(Icons.schedule),
             label: 'History',
           ),
           NavigationDestination(
@@ -56,47 +113,10 @@ class _NavigationExampleState extends State<NavigationExample> {
         ],
       ),
       body: <Widget>[
-        /// Home Page
-        Card(
-          shadowColor: Colors.transparent,
-          margin: const EdgeInsets.all(8.0),
-          child: SizedBox.expand(
-            child: Center(
-              child: Text(
-                'Home page',
-                style: theme.textTheme.titleLarge,
-              ),
-            ),
-          ),
-        ),
-
-        /// History page
-        Card(
-          shadowColor: Colors.transparent,
-          margin: const EdgeInsets.all(8.0),
-          child: SizedBox.expand(
-            child: Center(
-              child: Text(
-                'History page',
-                style: theme.textTheme.titleLarge,
-              ),
-            ),
-          ),
-        ),
-
-        /// Settings page
-        Card(
-          shadowColor: Colors.transparent,
-          margin: const EdgeInsets.all(8.0),
-          child: SizedBox.expand(
-            child: Center(
-              child: Text(
-                'Settings page',
-                style: theme.textTheme.titleLarge,
-              ),
-            ),
-          ),
-        ),
+        Home(),
+        const Pending(),
+        const History(),
+        const Settings(),
       ][currentPageIndex],
     );
   }
