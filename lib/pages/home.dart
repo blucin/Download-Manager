@@ -59,7 +59,7 @@ class _HomeState extends ConsumerState<Home> {
             label: 'View',
             onPressed: () {
               // Navigate to pending downloads page
-              DefaultTabController.of(context)?.animateTo(1);
+              DefaultTabController.of(context).animateTo(1);
             },
           ),
         ),

@@ -27,7 +27,7 @@ void main() async {
   } 
 
   FileDownloader().configureNotification(
-    running: TaskNotification('Downloading', 'file: {filename}'),
+    running: const TaskNotification('Downloading', 'file: {filename}'),
     progressBar: true
   );
 
@@ -113,7 +113,7 @@ class _NavigationExampleState extends ConsumerState<NavigationExample> {
         ],
       ),
       body: <Widget>[
-        Home(),
+        const Home(),
         const Pending(),
         const History(),
         const Settings(),
