@@ -7,7 +7,8 @@ import './pages/home.dart';
 import './pages/history.dart';
 import './pages/pending.dart';
 import './pages/settings.dart';
-import './providers.dart';
+import 'providers/providers.dart';
+import 'providers/theme_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,16 +37,18 @@ void main() async {
       overrides: [
         sharedPreferencesProvider.overrideWithValue(prefs),
       ],
-      child: const NavigationBarApp(),
+      child: const MyApp(),
     ),
   );
 }
 
-class NavigationBarApp extends StatelessWidget {
-  const NavigationBarApp({super.key});
+class MyApp extends ConsumerWidget {
+  const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isDarkMode = ref.watch(themeProvider);
+    
     return MaterialApp(
       theme: ThemeData(
         useMaterial3: true,
@@ -57,6 +60,7 @@ class NavigationBarApp extends StatelessWidget {
         colorSchemeSeed: Colors.blue,
         brightness: Brightness.dark,
       ),
+      themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
       home: const NavigationExample(),
     );
   }

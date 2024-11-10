@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers.dart';
+import '../providers/providers.dart';
 import 'package:background_downloader/background_downloader.dart';
 
 class Pending extends ConsumerWidget {

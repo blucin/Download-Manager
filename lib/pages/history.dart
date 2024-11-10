@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../providers.dart';
+import '../providers/providers.dart';
 import 'dart:io';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -117,110 +117,113 @@ class History extends ConsumerWidget {
     final historyItems = ref.watch(downloadHistoryProvider);
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Scaffold(
-      body: Card(
-        shadowColor: Colors.transparent,
-        margin: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Download History',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.primary,
-                        ),
-                  ),
-                  if (historyItems.isNotEmpty)
-                    TextButton.icon(
-                      onPressed: () {
-                        ref
-                            .read(downloadHistoryProvider.notifier)
-                            .clearHistory();
-                      },
-                      icon: const Icon(Icons.delete_outline),
-                      label: const Text('Clear'),
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Card(
+          shadowColor: Colors.transparent,
+          margin: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Download History',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: colorScheme.primary,
+                          ),
                     ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: historyItems.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.history,
-                            size: 64,
-                            color: colorScheme.primary.withOpacity(0.5),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'No download history',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
-                                ?.copyWith(
-                                  color: colorScheme.onSurface.withOpacity(0.7),
-                                ),
-                          ),
-                        ],
+                    if (historyItems.isNotEmpty)
+                      TextButton.icon(
+                        onPressed: () {
+                          ref
+                              .read(downloadHistoryProvider.notifier)
+                              .clearHistory();
+                        },
+                        icon: const Icon(Icons.delete_outline),
+                        label: const Text('Clear'),
                       ),
-                    )
-                  : ListView.builder(
-                      itemCount: historyItems.length,
-                      itemBuilder: (context, index) {
-                        final item = historyItems[index];
+                  ],
+                ),
+              ),
+              Expanded(
+                child: historyItems.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.history,
+                              size: 64,
+                              color: colorScheme.primary.withOpacity(0.5),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No download history',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    color: colorScheme.onSurface.withOpacity(0.7),
+                                  ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : ListView.builder(
+                        itemCount: historyItems.length,
+                        itemBuilder: (context, index) {
+                          final item = historyItems[index];
 
-                        return Dismissible(
-                          key: Key(item.taskId),
-                          background: Container(
-                            color: colorScheme.error,
-                            alignment: Alignment.centerRight,
-                            padding: const EdgeInsets.only(right: 16.0),
-                            child: Icon(
-                              Icons.delete,
-                              color: colorScheme.onError,
+                          return Dismissible(
+                            key: Key(item.taskId),
+                            background: Container(
+                              color: colorScheme.error,
+                              alignment: Alignment.centerRight,
+                              padding: const EdgeInsets.only(right: 16.0),
+                              child: Icon(
+                                Icons.delete,
+                                color: colorScheme.onError,
+                              ),
                             ),
-                          ),
-                          direction: DismissDirection.endToStart,
-                          onDismissed: (_) {
-                            ref
-                                .read(downloadHistoryProvider.notifier)
-                                .removeHistoryItem(item.taskId);
-                          },
-                          child: ListTile(
-                            leading: Icon(
-                              _getStatusIcon(item.status),
-                              color: _getStatusColor(item.status, colorScheme),
+                            direction: DismissDirection.endToStart,
+                            onDismissed: (_) {
+                              ref
+                                  .read(downloadHistoryProvider.notifier)
+                                  .removeHistoryItem(item.taskId);
+                            },
+                            child: ListTile(
+                              leading: Icon(
+                                _getStatusIcon(item.status),
+                                color: _getStatusColor(item.status, colorScheme),
+                              ),
+                              title: Text(
+                                item.filename,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              subtitle: Text(
+                                _formatDateTime(item.timestamp),
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                              trailing: item.status == 'TaskStatus.complete'
+                                  ? IconButton(
+                                      icon: const Icon(Icons.folder_open),
+                                      onPressed: () =>
+                                          _openFile(context, item.filePath),
+                                    )
+                                  : null,
                             ),
-                            title: Text(
-                              item.filename,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            subtitle: Text(
-                              _formatDateTime(item.timestamp),
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                            trailing: item.status == 'TaskStatus.complete'
-                                ? IconButton(
-                                    icon: const Icon(Icons.folder_open),
-                                    onPressed: () =>
-                                        _openFile(context, item.filePath),
-                                  )
-                                : null,
-                          ),
-                        );
-                      },
-                    ),
-            ),
-          ],
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ),
         ),
       ),
     );
