@@ -1,5 +1,7 @@
 # Download-Manager
 
+A simple download manager app built with Flutter. Used riverpod for state management and background_downloader for downloading files in the background.
+
 <div align="center">
 <div>
    <img src="./assets/1.png" width="20%" />
