@@ -1,16 +1,36 @@
-# flutter_application_1
+# Download-Manager
 
-A new Flutter project.
+<div align="center">
+<div>
+   <img src="./assets/1.png" width="20%" />
+   <img src="./assets/3.png" width="20%" />
+   <img src="./assets/4.png" width="20%" />
+   <img src="./assets/5.png" width="20%" />
+</div>
+</div>
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+### Prerequisites
 
-A few resources to get you started if this is your first Flutter project:
+Ensure you have the following installed on your development machine:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- Flutter SDK
+- Dart SDK
+- A suitable IDE such as Visual Studio Code or Android Studio
+- An emulator or physical device for testing
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### Installation
+
+1. Install the necessary dependencies:
+
+   ```sh
+   flutter pub get
+   ```
+
+2. Run the application:
+
+   ```sh
+   flutter run
+   ```
+
